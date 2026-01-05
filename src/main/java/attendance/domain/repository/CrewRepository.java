@@ -5,7 +5,6 @@ import attendance.domain.model.Crew;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public class CrewRepository {
 
@@ -17,9 +16,9 @@ public class CrewRepository {
         crews.add(crew);
     }
 
-    public Optional<Crew> findByName(String name) {
+    public Optional<Crew> findByNickname(String name) {
         return crews.stream()
-                .filter(crew -> crew.getName().equals(name))
+                .filter(crew -> crew.getNickname().equals(name))
                 .findFirst();
     }
 }

@@ -2,17 +2,17 @@ package attendance.domain.model;
 
 public class Crew {
 
-    private String name;
+    private String nickname;
 
-    private Crew(String name) {
-        this.name = name;
+    private Crew(String nickname) {
+        this.nickname = nickname;
     }
 
-    public static Crew create(String name) {
-        return new Crew(name);
+    public static Crew create(String nickname) {
+        return new Crew(nickname);
     }
 
-    public String getName() {
-        return name;
+    public String getNickname() {
+        return nickname;
     }
 }
