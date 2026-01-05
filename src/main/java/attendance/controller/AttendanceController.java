@@ -2,10 +2,13 @@ package attendance.controller;
 
 import attendance.domain.dto.AttendanceModifyingResultDto;
 import attendance.domain.dto.AttendanceResultDto;
+import attendance.domain.dto.ThisMonthAttendanceResultDto;
 import attendance.domain.service.AttendanceService;
 import attendance.global.util.FileService;
 import attendance.view.InputView;
 import attendance.view.OutputView;
+
+import java.util.List;
 
 import static attendance.global.util.Retry.retry;
 
@@ -72,6 +75,9 @@ public class AttendanceController {
 
             if (type.equals("3")) { // 크루별 출석 기록 확인
                 //TODO
+                String crewNickname = inputView.inputCrewNickname();
+                ThisMonthAttendanceResultDto resultDto = attendanceService.getAttendancesByCrew(crewNickname);
+                outputView.outputThisMonthAttendance(resultDto);
             }
 
             if (type.equals("4")) { // 제적 위험자 확인

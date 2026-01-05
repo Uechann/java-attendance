@@ -30,8 +30,8 @@ public class FileService {
                 String crewName = crewAttendances[0];
                 String attendanceTime = crewAttendances[1];
 
-                Crew crew = Crew.create(crewName);
-                crewRepository.save(crew);
+                Crew crew = crewRepository.findByNickname(crewName)
+                                .orElse(crewRepository.save(Crew.create(crewName)));
 
                 String[] dateTime = attendanceTime.split(" ");
                 String date = dateTime[0];
@@ -48,7 +48,7 @@ public class FileService {
                 LocalDateTime attendanceAt = LocalDateTime.of(year, month, day, hour, minute);
                 attendanceRepository.save(Attendance.of(crew, attendanceAt));
 
-                System.out.println(crew.getNickname() + " " + attendanceAt + " 크루 출석 저장 완료");
+//                System.out.println(crew.getNickname() + " " + attendanceAt + " 크루 출석 저장 완료");
             }
         } catch (IOException e) {
             throw new RuntimeException(e);

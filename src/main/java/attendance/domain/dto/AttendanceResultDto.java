@@ -1,26 +1,59 @@
 package attendance.domain.dto;
 
+import attendance.domain.model.Attendance;
+import attendance.domain.model.CustomDayOfWeek;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+
 public record AttendanceResultDto(
         String crewNickname,
-        int month,
-        int day,
+        LocalDate date,
         String dayOfWeek,
-        int hour,
-        int minute,
+        LocalTime time,
         String attendanceStatus
 ) {
-
-    public static AttendanceResultDto of(String crewNickname, int month, int day, String dayOfWeek, int hour, int minute, String attendanceStatus) {
-        return new AttendanceResultDto(crewNickname, month, day, dayOfWeek, hour, minute, attendanceStatus);
+    public static AttendanceResultDto of(Attendance attendance) {
+        return new AttendanceResultDto(
+                attendance.getCrew().getNickname(),
+                attendance.getAttendanceDate(),
+                CustomDayOfWeek.getKoreaName(attendance.getAttendanceDate().getDayOfWeek()),
+                attendance.getAttendanceTime(),
+                attendance.getStatus().getName()
+        );
     }
+
+    public static AttendanceResultDto of(
+            String crewNickname,
+            LocalDate date,
+            String dayOfWeek,
+            LocalTime time,
+            String attendanceStatus
+    ) {
+        return new AttendanceResultDto(
+                crewNickname,
+                date,
+                dayOfWeek,
+                null,
+                attendanceStatus
+        );
+    }
+
 
     @Override
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(month).append("월 ");
-        stringBuilder.append(day).append("일 ");
+        stringBuilder.append(date.getMonthValue()).append("월 ").append(String.format("%02d",date.getDayOfMonth())).append("일 ");
         stringBuilder.append(dayOfWeek).append("요일 ");
-        stringBuilder.append(hour).append(":").append(minute).append(" ");
+
+        if (time != null) {
+            stringBuilder.append(String.format("%02d", time.getHour())).append(":").append(String.format("%02d", time.getMinute())).append(" ");
+        }
+
+        if (time == null) {
+            stringBuilder.append("--:-- ");
+        }
+
         stringBuilder.append("(").append(attendanceStatus).append(")");
         return stringBuilder.toString();
     }

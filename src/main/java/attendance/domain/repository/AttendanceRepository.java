@@ -12,9 +12,13 @@ public class AttendanceRepository {
         attendances.computeIfAbsent(attendance.getCrew().getNickname(), k -> new ArrayList<>()).add(attendance);
     }
 
-    public Optional<Attendance> findByCrewNickNameAndDay(String crewNickname, int dayOfMonth) {
+    public Optional<Attendance> findByCrewNicknameAndDay(String crewNickname, int dayOfMonth) {
         return attendances.get(crewNickname).stream()
                 .filter(attendance -> attendance.getAttendanceDate().getDayOfMonth() == dayOfMonth)
                 .findFirst();
+    }
+
+    public List<Attendance> findByCrewNickname(String crewNickname) {
+        return List.copyOf(attendances.get(crewNickname));
     }
 }

@@ -25,11 +25,16 @@ public class Attendance {
     }
 
     public static Attendance of(Crew crew, LocalDateTime attendanceAt) {
-        // 월요일 13:00시
         DayOfWeek dayOfWeek = attendanceAt.getDayOfWeek();
         LocalTime attendanceTime = attendanceAt.toLocalTime();
         AttendanceStatus status = judgeAttendanceStatus(dayOfWeek, attendanceTime);
+        crew.countAttendance(status);
         return new Attendance(crew, attendanceAt.toLocalDate(), attendanceTime, status);
+    }
+
+    public static Attendance of(Crew crew, LocalDate attendanceDate, LocalTime attendanceTime, AttendanceStatus status) {
+        crew.countAttendance(status);
+        return new Attendance(crew, attendanceDate, attendanceTime, status);
     }
 
     private static AttendanceStatus judgeAttendanceStatus(DayOfWeek dayOfWeek, LocalTime attendanceTime) {
@@ -81,7 +86,9 @@ public class Attendance {
 
     public void modifyAttendanceTime(LocalTime attendanceTime) {
         this.attendanceTime = attendanceTime;
+        crew.decreaseAttendance(this.status);
         this.status = judgeAttendanceStatus(attendanceDate.getDayOfWeek(), attendanceTime);
+        crew.countAttendance(this.status);
     }
 
     public AttendanceStatus getStatus() {

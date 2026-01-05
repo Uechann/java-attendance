@@ -12,8 +12,9 @@ public class CrewRepository {
 
     public CrewRepository() {}
 
-    public void save(Crew crew) {
+    public Crew save(Crew crew) {
         crews.add(crew);
+        return crew;
     }
 
     public Optional<Crew> findByNickname(String name) {
