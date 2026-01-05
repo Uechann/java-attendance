@@ -6,11 +6,12 @@ public record AttendanceResultDto(
         int day,
         String dayOfWeek,
         int hour,
-        int minute
+        int minute,
+        String attendanceStatus
 ) {
 
-    public static AttendanceResultDto of(String crewNickname, int month, int day, String dayOfWeek, int hour, int minute) {
-        return new AttendanceResultDto(crewNickname, month, day, dayOfWeek, hour, minute);
+    public static AttendanceResultDto of(String crewNickname, int month, int day, String dayOfWeek, int hour, int minute, String attendanceStatus) {
+        return new AttendanceResultDto(crewNickname, month, day, dayOfWeek, hour, minute, attendanceStatus);
     }
 
     @Override
@@ -20,7 +21,7 @@ public record AttendanceResultDto(
         stringBuilder.append(day).append("일 ");
         stringBuilder.append(dayOfWeek).append("요일 ");
         stringBuilder.append(hour).append(":").append(minute).append(" ");
-        stringBuilder.append("(출석)");
+        stringBuilder.append("(").append(attendanceStatus).append(")");
         return stringBuilder.toString();
     }
 }

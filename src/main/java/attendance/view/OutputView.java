@@ -1,5 +1,6 @@
 package attendance.view;
 
+import attendance.domain.dto.AttendanceModifyingResultDto;
 import attendance.domain.dto.AttendanceResultDto;
 import attendance.domain.model.CustomDayOfWeek;
 import camp.nextstep.edu.missionutils.DateTimes;
@@ -26,5 +27,9 @@ public class OutputView {
 
     public void outputCrewAttendanceCheck(AttendanceResultDto attendanceResultDto) {
         System.out.println(attendanceResultDto.toString());
+    }
+
+    public void outputModifyingAttendance(AttendanceModifyingResultDto modifyingResultDto) {
+        System.out.println(modifyingResultDto.toString());
     }
 }

@@ -1,5 +1,6 @@
 package attendance.controller;
 
+import attendance.domain.dto.AttendanceModifyingResultDto;
 import attendance.domain.dto.AttendanceResultDto;
 import attendance.domain.service.AttendanceService;
 import attendance.global.util.FileService;
@@ -57,15 +58,16 @@ public class AttendanceController {
 
             if (type.equals("2")) { // 출석 수정
                 // TODO:
-                String modifyingCrewNickname = inputView.inputModifyingCrewNickname();
+                String crewNickname = inputView.inputModifyingCrewNickname();
                 // TODO 검증
 
-                String modifyingDayOfMonth = inputView.inputModifyingDayOfMonth();
+                String dayOfMonth = inputView.inputModifyingDayOfMonth();
                 // TODO 검증
 
-                String modifyingAttendanceTime = inputView.inputModifyingAttendanceTime();
+                String attendanceTime = inputView.inputModifyingAttendanceTime();
                 // TODO 검증
-
+                AttendanceModifyingResultDto modifyingResultDto = attendanceService.modifyCrewAttendance(crewNickname, dayOfMonth, attendanceTime);
+                outputView.outputModifyingAttendance(modifyingResultDto);
             }
 
             if (type.equals("3")) { // 크루별 출석 기록 확인

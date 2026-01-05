@@ -10,7 +10,10 @@ public enum ErrorMessage {
     WEEKDAY_NOT_FOUND("[ERROR] 해당 요일이 없습니다."),
 
     // 크루
-    CREW_NOT_FOUND("[ERROR] 등록되지 않은 닉네임입니다.");
+    CREW_NOT_FOUND("[ERROR] 등록되지 않은 닉네임입니다."),
+
+    // 출석
+    ATTENDANCE_NOT_FOUND("[ERROR] 수정하고자 하는 출석 기록이 없습니다.");
 
 
     private String message;

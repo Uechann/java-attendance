@@ -2,10 +2,7 @@ package attendance.domain.repository;
 
 import attendance.domain.model.Attendance;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class AttendanceRepository {
 
@@ -15,7 +12,9 @@ public class AttendanceRepository {
         attendances.computeIfAbsent(attendance.getCrew().getNickname(), k -> new ArrayList<>()).add(attendance);
     }
 
-    public List<Attendance> findByCrewNickName(String crewNickname) {
-        return attendances.get(crewNickname);
+    public Optional<Attendance> findByCrewNickNameAndDay(String crewNickname, int dayOfMonth) {
+        return attendances.get(crewNickname).stream()
+                .filter(attendance -> attendance.getAttendanceDate().getDayOfMonth() == dayOfMonth)
+                .findFirst();
     }
 }

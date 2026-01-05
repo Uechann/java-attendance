@@ -1,6 +1,7 @@
 package attendance.domain.model;
 
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -14,16 +15,56 @@ public class Attendance {
     private LocalTime attendanceTime;
 
     // 출석 상태
-    private 
+    private AttendanceStatus status;
 
-    private Attendance(Crew crew, LocalDate attendanceDate, LocalTime attendanceTime) {
+    private Attendance(Crew crew, LocalDate attendanceDate, LocalTime attendanceTime, AttendanceStatus status) {
         this.crew = crew;
         this.attendanceDate = attendanceDate;
         this.attendanceTime = attendanceTime;
+        this.status = status;
     }
 
     public static Attendance of(Crew crew, LocalDateTime attendanceAt) {
-        return new Attendance(crew, attendanceAt.toLocalDate(), attendanceAt.toLocalTime());
+        // 월요일 13:00시
+        DayOfWeek dayOfWeek = attendanceAt.getDayOfWeek();
+        LocalTime attendanceTime = attendanceAt.toLocalTime();
+        AttendanceStatus status = judgeAttendanceStatus(dayOfWeek, attendanceTime);
+        return new Attendance(crew, attendanceAt.toLocalDate(), attendanceTime, status);
+    }
+
+    private static AttendanceStatus judgeAttendanceStatus(DayOfWeek dayOfWeek, LocalTime attendanceTime) {
+        AttendanceStatus status = AttendanceStatus.ATTENDANCE;
+        if (dayOfWeek.equals(DayOfWeek.MONDAY)) {
+            LocalTime lateCriteria = LocalTime.of(13, 5);
+            LocalTime absenceCriteria = LocalTime.of(13, 30);
+            if (attendanceTime.isAfter(lateCriteria) && attendanceTime.isBefore(absenceCriteria)) {
+                status = AttendanceStatus.LATE;
+            }
+
+            if (attendanceTime.isAfter(absenceCriteria)) {
+                status = AttendanceStatus.ABSENCE;
+            }
+        }
+
+        // 화수목금 10:00
+        if (dayOfWeek.equals(DayOfWeek.TUESDAY) || dayOfWeek.equals(DayOfWeek.WEDNESDAY)
+                || dayOfWeek.equals(DayOfWeek.THURSDAY) || dayOfWeek.equals(DayOfWeek.FRIDAY)
+        ) {
+            LocalTime lateCriteria = LocalTime.of(10, 5);
+            LocalTime absenceCriteria = LocalTime.of(10, 30);
+            if (attendanceTime.isAfter(lateCriteria) && attendanceTime.isBefore(absenceCriteria)) {
+                status = AttendanceStatus.LATE;
+            }
+
+            if (attendanceTime.isAfter(absenceCriteria)) {
+                status = AttendanceStatus.ABSENCE;
+            }
+        }
+        return status;
+    }
+
+    public static Attendance copy(Attendance attendance) {
+        return new Attendance(attendance.crew, attendance.getAttendanceDate(), attendance.getAttendanceTime(), attendance.getStatus());
     }
 
     public Crew getCrew() {
@@ -40,5 +81,10 @@ public class Attendance {
 
     public void modifyAttendanceTime(LocalTime attendanceTime) {
         this.attendanceTime = attendanceTime;
+        this.status = judgeAttendanceStatus(attendanceDate.getDayOfWeek(), attendanceTime);
+    }
+
+    public AttendanceStatus getStatus() {
+        return status;
     }
 }
