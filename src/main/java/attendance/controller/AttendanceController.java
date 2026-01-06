@@ -5,10 +5,11 @@ import attendance.domain.dto.AttendanceResultDto;
 import attendance.domain.dto.ThisMonthAttendanceResultDto;
 import attendance.domain.service.AttendanceService;
 import attendance.global.util.FileService;
+import attendance.global.validator.InputValidator;
 import attendance.view.InputView;
 import attendance.view.OutputView;
 
-import java.util.List;
+import javax.xml.validation.Validator;
 
 import static attendance.global.util.Retry.retry;
 
@@ -35,31 +36,25 @@ public class AttendanceController {
         fileService.initialCrew();
         while (true) {
             outputView.outputTodayDate();
-            String type = inputView.inputFunction();
-
-            // 잘못된 형식 오류
+            String function = inputView.inputFunction();
+            InputValidator.validateInputFunction(function);
 
             // 등교일 아닐 때 오류
 
-            if (type.equals("1")) { // 출석 확인
-                retry(() -> {
-                    String crewNicknameInput = inputView.inputCrewNickname();
-                    // TODO: 검증
-                    // 없는 크루일때 오류
+            if (function.equals("1")) { // 출석 확인
+                String crewNicknameInput = inputView.inputCrewNickname();
+                attendanceService.validateIsExist(crewNicknameInput);
+                String attendanceTimeInput = inputView.inputAttendanceTime();
+                InputValidator.validateInputTime(attendanceTimeInput);
 
-                    String attendanceTimeInput = inputView.inputAttendanceTime();
-                    // TODO: 검증
-                    // 등교 시간이 아닐 때 오류
-                    // 미래 날짜 일때 오류
-                    // 이미 출석한 경우 오류 후 수정으로 안내
-
-                    AttendanceResultDto attendanceResultDto = attendanceService.attendanceCrew(crewNicknameInput, attendanceTimeInput);
-                    outputView.outputCrewAttendanceCheck(attendanceResultDto);
-                    return null;
-                });
+                // 등교일이 아닐 때
+                // 이미 출석한 경우
+                // 미래 시간일 때
+                AttendanceResultDto attendanceResultDto = attendanceService.attendanceCrew(crewNicknameInput, attendanceTimeInput);
+                outputView.outputCrewAttendanceCheck(attendanceResultDto);
             }
 
-            if (type.equals("2")) { // 출석 수정
+            if (function.equals("2")) { // 출석 수정
                 // TODO:
                 String crewNickname = inputView.inputModifyingCrewNickname();
                 // TODO 검증
@@ -73,18 +68,18 @@ public class AttendanceController {
                 outputView.outputModifyingAttendance(modifyingResultDto);
             }
 
-            if (type.equals("3")) { // 크루별 출석 기록 확인
+            if (function.equals("3")) { // 크루별 출석 기록 확인
                 //TODO
                 String crewNickname = inputView.inputCrewNickname();
                 ThisMonthAttendanceResultDto resultDto = attendanceService.getAttendancesByCrew(crewNickname);
                 outputView.outputThisMonthAttendance(resultDto);
             }
 
-            if (type.equals("4")) { // 제적 위험자 확인
+            if (function.equals("4")) { // 제적 위험자 확인
                 //TODO
             }
 
-            if (type.equals("Q")) { // 종료
+            if (function.equals("Q")) { // 종료
                 break;
             }
         }

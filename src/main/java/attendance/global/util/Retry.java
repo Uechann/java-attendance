@@ -9,10 +9,8 @@ public final class Retry {
         while (true) {
             try {
                 return action.get();
-            } catch (IllegalArgumentException e) {
+            } catch (IllegalArgumentException | NoSuchElementException e) {
                 System.out.println(e.getMessage());
-            } catch (NoSuchElementException e) {
-                throw e;
             }
         }
     }

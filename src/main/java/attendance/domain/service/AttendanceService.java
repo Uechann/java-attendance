@@ -31,6 +31,11 @@ public class AttendanceService {
         this.attendanceRepository = attendanceRepository;
     }
 
+    public void validateIsExist(String crewNickName) {
+        crewRepository.findByNickname(crewNickName)
+                .orElseThrow(() -> new IllegalArgumentException(CREW_NOT_FOUND.getMessage()));
+    }
+
     // 출석 체크
     public AttendanceResultDto attendanceCrew(String crewNickname, String attendanceTime) {
         Crew crew = crewRepository.findByNickname(crewNickname)
@@ -79,12 +84,9 @@ public class AttendanceService {
                 .orElseThrow(() -> new IllegalArgumentException(CREW_NOT_FOUND.getMessage()));
 
         List<Attendance> attendances = attendanceRepository.findByCrewNickname(crewNickname);
-        System.out.println(attendances.size());
         LocalDateTime now = DateTimes.now();
-        int today = now.getDayOfMonth();
-
         List<AttendanceResultDto> attendanceResultDtos = new ArrayList<>();
-        for (int i = 1; i <= today - 1; i++) {
+        for (int i = 1; i <= now.getDayOfMonth() - 1; i++) {
             LocalDate date = LocalDate.of(now.getYear(), now.getMonthValue(), i);
             if (date.getDayOfWeek().equals(DayOfWeek.SATURDAY) || date.getDayOfWeek().equals(DayOfWeek.SUNDAY)) {
                 continue;
@@ -95,7 +97,6 @@ public class AttendanceService {
                     .findFirst()
                     .orElseGet(() -> Attendance.of(crew, date, null, AttendanceStatus.ABSENCE));
             // orElse 이거만 하면 미리 만들어놓는다 이거 주의 !
-
             attendanceResultDtos.add(AttendanceResultDto.of(crewAttendance));
         }
         return ThisMonthAttendanceResultDto.of(
