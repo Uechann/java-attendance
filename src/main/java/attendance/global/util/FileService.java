@@ -31,7 +31,7 @@ public class FileService {
                 String attendanceTime = crewAttendances[1];
 
                 Crew crew = crewRepository.findByNickname(crewName)
-                                .orElse(crewRepository.save(Crew.create(crewName)));
+                                .orElseGet(() -> crewRepository.save(Crew.create(crewName)));
 
                 String[] dateTime = attendanceTime.split(" ");
                 String date = dateTime[0];
