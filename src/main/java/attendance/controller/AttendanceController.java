@@ -40,16 +40,15 @@ public class AttendanceController {
             InputValidator.validateInputFunction(function);
 
             // 등교일 아닐 때 오류
-
             if (function.equals("1")) { // 출석 확인
+                //입력 받기 전에 등교일 검증
+                attendanceService.validateNowDate();
+
                 String crewNicknameInput = inputView.inputCrewNickname();
                 attendanceService.validateIsExist(crewNicknameInput);
                 String attendanceTimeInput = inputView.inputAttendanceTime();
                 InputValidator.validateInputTime(attendanceTimeInput);
 
-                // 등교일이 아닐 때
-                // 이미 출석한 경우
-                // 미래 시간일 때
                 AttendanceResultDto attendanceResultDto = attendanceService.attendanceCrew(crewNicknameInput, attendanceTimeInput);
                 outputView.outputCrewAttendanceCheck(attendanceResultDto);
             }

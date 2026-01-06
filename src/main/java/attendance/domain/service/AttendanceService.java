@@ -18,8 +18,7 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import static attendance.global.exception.ErrorMessage.ATTENDANCE_NOT_FOUND;
-import static attendance.global.exception.ErrorMessage.CREW_NOT_FOUND;
+import static attendance.global.exception.ErrorMessage.*;
 
 public class AttendanceService {
 
@@ -47,16 +46,30 @@ public class AttendanceService {
         int minute = Integer.parseInt(hourMinute[1]);
 
         LocalDateTime now = DateTimes.now();
-        String dayOfWeek = CustomDayOfWeek.getKoreaName(now.getDayOfWeek());
         LocalDateTime attendanceAt = LocalDateTime.of(now.getYear(), now.getMonth(), now.getDayOfMonth(), hour, minute);
 
+        validateIsFutureTime(attendanceAt, now);
+        validateNowDate();
+
         // TODO: 출석 상태 검사 기능 추가
+        attendanceRepository.findByCrewNicknameAndDate(crewNickname, now.toLocalDate())
+                .ifPresent(att -> {
+                    throw new IllegalArgumentException(ATTENDANCE_ALREADY_EXIST.getMessage());
+                });
+
         Attendance attendance = Attendance.of(crew, attendanceAt);
         attendanceRepository.save(attendance);
         return AttendanceResultDto.of(attendance);
     }
 
-
+    public void validateNowDate() {
+        LocalDateTime now = DateTimes.now();
+        String dayOfWeek = CustomDayOfWeek.getKoreaName(now.getDayOfWeek());
+        if (dayOfWeek.equals("토") || dayOfWeek.equals("일")) {
+            throw new IllegalArgumentException(ERROR_MESSAGE.getMessage() +
+                    String.format(" %02d월 %02d일 %s요일은 등교일이 아닙니다.", now.getMonthValue(), now.getDayOfMonth(), dayOfWeek));
+        }
+    }
 
     // 출석 수정
     //12월 03일 화요일 10:07 (지각) -> 09:58 (출석) 수정 완료!
@@ -108,4 +121,11 @@ public class AttendanceService {
 
     // 제적 위험자 확인
 
+
+
+    public void validateIsFutureTime(LocalDateTime attendanceAt, LocalDateTime now) {
+        if (attendanceAt.toLocalDate().isAfter(now.toLocalDate())) {
+            throw new IllegalArgumentException(INVALID_FUTURE_TIME.getMessage());
+        }
+    }
 }
