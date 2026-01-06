@@ -41,15 +41,11 @@ public class AttendanceService {
 
         LocalDateTime now = DateTimes.now();
         LocalDateTime attendanceAt = LocalDateTime.of(now.getYear(), now.getMonth(), now.getDayOfMonth(), hour, minute);
-
         validateIsFutureTime(attendanceAt, now);
-        validateNowDate();
 
-        // TODO: 출석 상태 검사 기능 추가
         attendanceRepository.findByCrewNicknameAndDate(crewNickname, now.toLocalDate())
                 .ifPresent(att -> {
-                    throw new IllegalArgumentException(ATTENDANCE_ALREADY_EXIST.getMessage());
-                });
+                    throw new IllegalArgumentException(ATTENDANCE_ALREADY_EXIST.getMessage());});
 
         Attendance attendance = Attendance.of(crew, attendanceAt);
         attendanceRepository.save(attendance);
@@ -57,14 +53,8 @@ public class AttendanceService {
     }
 
     // 출석 수정
-    //12월 03일 화요일 10:07 (지각) -> 09:58 (출석) 수정 완료!
     public AttendanceModifyingResultDto modifyCrewAttendance(String modifyingCrewNickname, String modifyingDayOfMonth, String modifyingAttendanceTime) {
-        Crew crew = crewRepository.findByNickname(modifyingCrewNickname)
-                .orElseThrow(() -> new IllegalArgumentException(CREW_NOT_FOUND.getMessage()));
-
-        int day = Integer.parseInt(modifyingDayOfMonth);
-
-        Attendance attendance = attendanceRepository.findByCrewNicknameAndDay(modifyingCrewNickname, day)
+        Attendance attendance = attendanceRepository.findByCrewNicknameAndDay(modifyingCrewNickname, Integer.parseInt(modifyingDayOfMonth))
                 .orElseThrow(() -> new IllegalArgumentException(ATTENDANCE_NOT_FOUND.getMessage()));
         Attendance previousAttendance = Attendance.copy(attendance);
 
@@ -84,11 +74,8 @@ public class AttendanceService {
         List<Attendance> attendances = attendanceRepository.findByCrewNickname(crewNickname);
         LocalDateTime now = DateTimes.now();
         List<AttendanceResultDto> attendanceResultDtos = new ArrayList<>();
-        for (int i = 1; i <= now.getDayOfMonth() - 1; i++) {
+        for (int i = 1; i <= now.getDayOfMonth() - 1 && validateDate(now.toLocalDate()); i++) {
             LocalDate date = LocalDate.of(now.getYear(), now.getMonthValue(), i);
-            if (date.getDayOfWeek().equals(DayOfWeek.SATURDAY) || date.getDayOfWeek().equals(DayOfWeek.SUNDAY)) {
-                continue;
-            }
 
             Attendance crewAttendance = attendances.stream()
                     .filter(attendance -> attendance.getAttendanceDate().equals(date))
@@ -97,11 +84,10 @@ public class AttendanceService {
             // orElse 이거만 하면 미리 만들어놓는다 이거 주의 ! -> orElseGet() 을통해 해결
             attendanceResultDtos.add(AttendanceResultDto.of(crewAttendance));
         }
-        return ThisMonthAttendanceResultDto.of(
-                crewNickname, attendanceResultDtos,
+
+        return ThisMonthAttendanceResultDto.of(crewNickname, attendanceResultDtos,
                 crew.getAttendanceCount(), crew.getLateCount(), crew.getAbsenceCount(),
-                crew.getCrewStatus().getName()
-        );
+                crew.getCrewStatus().getName());
     }
 
     // 제적 위험자 확인
@@ -134,5 +120,12 @@ public class AttendanceService {
     public void validateIsExist(String crewNickName) {
         crewRepository.findByNickname(crewNickName)
                 .orElseThrow(() -> new IllegalArgumentException(CREW_NOT_FOUND.getMessage()));
+    }
+
+    private boolean validateDate(LocalDate date) {
+        if (date.getDayOfWeek().equals(DayOfWeek.SATURDAY) || date.getDayOfWeek().equals(DayOfWeek.SUNDAY)) {
+            return false;
+        }
+        return true;
     }
 }

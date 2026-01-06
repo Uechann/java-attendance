@@ -60,16 +60,16 @@ public class AttendanceController {
         }
     }
 
-    private void runCrewStatusCheck() {
-        List<CrewStatusResultDto> crewStatus = attendanceService.getCrewStatus();
-        outputView.outputCrewStatus(crewStatus);
-    }
+    private void runAttendanceCheck() {
+        //입력 받기 전에 등교일 검증
+        attendanceService.validateNowDate();
 
-    private void runAttendanceConfirmByCrew() {
-        // TODO 검증
-        String crewNickname = inputView.inputCrewNickname();
-        ThisMonthAttendanceResultDto resultDto = attendanceService.getAttendancesByCrew(crewNickname);
-        outputView.outputThisMonthAttendance(resultDto);
+        String crewNicknameInput = inputView.inputCrewNickname();
+        attendanceService.validateIsExist(crewNicknameInput);
+        String attendanceTimeInput = inputView.inputAttendanceTime();
+        InputValidator.validateInputTime(attendanceTimeInput);
+        AttendanceResultDto attendanceResultDto = attendanceService.attendanceCrew(crewNicknameInput, attendanceTimeInput);
+        outputView.outputCrewAttendanceCheck(attendanceResultDto);
     }
 
     private void runAttendanceModify() {
@@ -83,15 +83,15 @@ public class AttendanceController {
         outputView.outputModifyingAttendance(modifyingResultDto);
     }
 
-    private void runAttendanceCheck() {
-        //입력 받기 전에 등교일 검증
-        attendanceService.validateNowDate();
+    private void runAttendanceConfirmByCrew() {
+        // TODO 검증
+        String crewNickname = inputView.inputCrewNickname();
+        ThisMonthAttendanceResultDto resultDto = attendanceService.getAttendancesByCrew(crewNickname);
+        outputView.outputThisMonthAttendance(resultDto);
+    }
 
-        String crewNicknameInput = inputView.inputCrewNickname();
-        attendanceService.validateIsExist(crewNicknameInput);
-        String attendanceTimeInput = inputView.inputAttendanceTime();
-        InputValidator.validateInputTime(attendanceTimeInput);
-        AttendanceResultDto attendanceResultDto = attendanceService.attendanceCrew(crewNicknameInput, attendanceTimeInput);
-        outputView.outputCrewAttendanceCheck(attendanceResultDto);
+    private void runCrewStatusCheck() {
+        List<CrewStatusResultDto> crewStatus = attendanceService.getCrewStatus();
+        outputView.outputCrewStatus(crewStatus);
     }
 }
