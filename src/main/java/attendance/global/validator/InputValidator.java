@@ -18,6 +18,4 @@ public class InputValidator {
             throw new IllegalArgumentException(INVALID_INPUT_PATTERN.getMessage());
         }
     }
-
-
 }

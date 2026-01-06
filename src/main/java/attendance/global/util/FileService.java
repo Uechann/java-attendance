@@ -47,8 +47,6 @@ public class FileService {
                 int minute = Integer.parseInt(hourMinute[1]);
                 LocalDateTime attendanceAt = LocalDateTime.of(year, month, day, hour, minute);
                 attendanceRepository.save(Attendance.of(crew, attendanceAt));
-
-//                System.out.println(crew.getNickname() + " " + attendanceAt + " 크루 출석 저장 완료");
             }
         } catch (IOException e) {
             throw new RuntimeException(e);

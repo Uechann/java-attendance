@@ -16,8 +16,6 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 import static attendance.global.exception.ErrorMessage.*;
 
@@ -96,7 +94,7 @@ public class AttendanceService {
                     .filter(attendance -> attendance.getAttendanceDate().equals(date))
                     .findFirst()
                     .orElseGet(() -> Attendance.of(crew, date, null, AttendanceStatus.ABSENCE));
-            // orElse 이거만 하면 미리 만들어놓는다 이거 주의 !
+            // orElse 이거만 하면 미리 만들어놓는다 이거 주의 ! -> orElseGet() 을통해 해결
             attendanceResultDtos.add(AttendanceResultDto.of(crewAttendance));
         }
         return ThisMonthAttendanceResultDto.of(
@@ -116,8 +114,6 @@ public class AttendanceService {
                         .thenComparing(Crew::getNickname))
                 .map(CrewStatusResultDto::of)
                 .toList();
-        // 제적 위험자는 제적 대상자, 면담 대상자, 경고 대상자순으로 출력하며,
-        // 대상 항목별 정렬 순서는 지각을 결석으로 간주하여 내림차순한다. 출석 상태가 같으면 닉네임으로 오름차순 정렬한다.
     }
 
     public void validateIsFutureTime(LocalDateTime attendanceAt, LocalDateTime now) {

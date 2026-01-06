@@ -33,53 +33,65 @@ public class AttendanceController {
 
     public void run() {
         fileService.initialCrew();
-
         while (true) {
             outputView.outputTodayDate();
             String function = inputView.inputFunction();
             InputValidator.validateInputFunction(function);
 
             if (function.equals("1")) { // 출석 확인
-                //입력 받기 전에 등교일 검증
-                attendanceService.validateNowDate();
-
-                String crewNicknameInput = inputView.inputCrewNickname();
-                attendanceService.validateIsExist(crewNicknameInput);
-                String attendanceTimeInput = inputView.inputAttendanceTime();
-                InputValidator.validateInputTime(attendanceTimeInput);
-                AttendanceResultDto attendanceResultDto = attendanceService.attendanceCrew(crewNicknameInput, attendanceTimeInput);
-                outputView.outputCrewAttendanceCheck(attendanceResultDto);
+                runAttendanceCheck();
             }
 
             if (function.equals("2")) { // 출석 수정
-                // TODO:
-                String crewNickname = inputView.inputModifyingCrewNickname();
-                // TODO 검증
-
-                String dayOfMonth = inputView.inputModifyingDayOfMonth();
-                // TODO 검증
-
-                String attendanceTime = inputView.inputModifyingAttendanceTime();
-                // TODO 검증
-                AttendanceModifyingResultDto modifyingResultDto = attendanceService.modifyCrewAttendance(crewNickname, dayOfMonth, attendanceTime);
-                outputView.outputModifyingAttendance(modifyingResultDto);
+                runAttendanceModify();
             }
 
             if (function.equals("3")) { // 크루별 출석 기록 확인
-                // TODO 검증
-                String crewNickname = inputView.inputCrewNickname();
-                ThisMonthAttendanceResultDto resultDto = attendanceService.getAttendancesByCrew(crewNickname);
-                outputView.outputThisMonthAttendance(resultDto);
+                runAttendanceConfirmByCrew();
             }
 
             if (function.equals("4")) { // 제적 위험자 확인
-                List<CrewStatusResultDto> crewStatus = attendanceService.getCrewStatus();
-                outputView.outputCrewStatus(crewStatus);
+                runCrewStatusCheck();
             }
 
             if (function.equals("Q")) { // 종료
                 break;
             }
         }
+    }
+
+    private void runCrewStatusCheck() {
+        List<CrewStatusResultDto> crewStatus = attendanceService.getCrewStatus();
+        outputView.outputCrewStatus(crewStatus);
+    }
+
+    private void runAttendanceConfirmByCrew() {
+        // TODO 검증
+        String crewNickname = inputView.inputCrewNickname();
+        ThisMonthAttendanceResultDto resultDto = attendanceService.getAttendancesByCrew(crewNickname);
+        outputView.outputThisMonthAttendance(resultDto);
+    }
+
+    private void runAttendanceModify() {
+        String crewNickname = inputView.inputModifyingCrewNickname();
+        // TODO 검증
+        String dayOfMonth = inputView.inputModifyingDayOfMonth();
+        // TODO 검증
+        String attendanceTime = inputView.inputModifyingAttendanceTime();
+        // TODO 검증
+        AttendanceModifyingResultDto modifyingResultDto = attendanceService.modifyCrewAttendance(crewNickname, dayOfMonth, attendanceTime);
+        outputView.outputModifyingAttendance(modifyingResultDto);
+    }
+
+    private void runAttendanceCheck() {
+        //입력 받기 전에 등교일 검증
+        attendanceService.validateNowDate();
+
+        String crewNicknameInput = inputView.inputCrewNickname();
+        attendanceService.validateIsExist(crewNicknameInput);
+        String attendanceTimeInput = inputView.inputAttendanceTime();
+        InputValidator.validateInputTime(attendanceTimeInput);
+        AttendanceResultDto attendanceResultDto = attendanceService.attendanceCrew(crewNicknameInput, attendanceTimeInput);
+        outputView.outputCrewAttendanceCheck(attendanceResultDto);
     }
 }
