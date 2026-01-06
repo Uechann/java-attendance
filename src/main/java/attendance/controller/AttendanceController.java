@@ -2,6 +2,7 @@ package attendance.controller;
 
 import attendance.domain.dto.AttendanceModifyingResultDto;
 import attendance.domain.dto.AttendanceResultDto;
+import attendance.domain.dto.CrewStatusResultDto;
 import attendance.domain.dto.ThisMonthAttendanceResultDto;
 import attendance.domain.service.AttendanceService;
 import attendance.global.util.FileService;
@@ -9,9 +10,7 @@ import attendance.global.validator.InputValidator;
 import attendance.view.InputView;
 import attendance.view.OutputView;
 
-import javax.xml.validation.Validator;
-
-import static attendance.global.util.Retry.retry;
+import java.util.List;
 
 public class AttendanceController {
 
@@ -34,12 +33,12 @@ public class AttendanceController {
 
     public void run() {
         fileService.initialCrew();
+
         while (true) {
             outputView.outputTodayDate();
             String function = inputView.inputFunction();
             InputValidator.validateInputFunction(function);
 
-            // 등교일 아닐 때 오류
             if (function.equals("1")) { // 출석 확인
                 //입력 받기 전에 등교일 검증
                 attendanceService.validateNowDate();
@@ -48,7 +47,6 @@ public class AttendanceController {
                 attendanceService.validateIsExist(crewNicknameInput);
                 String attendanceTimeInput = inputView.inputAttendanceTime();
                 InputValidator.validateInputTime(attendanceTimeInput);
-
                 AttendanceResultDto attendanceResultDto = attendanceService.attendanceCrew(crewNicknameInput, attendanceTimeInput);
                 outputView.outputCrewAttendanceCheck(attendanceResultDto);
             }
@@ -68,14 +66,15 @@ public class AttendanceController {
             }
 
             if (function.equals("3")) { // 크루별 출석 기록 확인
-                //TODO
+                // TODO 검증
                 String crewNickname = inputView.inputCrewNickname();
                 ThisMonthAttendanceResultDto resultDto = attendanceService.getAttendancesByCrew(crewNickname);
                 outputView.outputThisMonthAttendance(resultDto);
             }
 
             if (function.equals("4")) { // 제적 위험자 확인
-                //TODO
+                List<CrewStatusResultDto> crewStatus = attendanceService.getCrewStatus();
+                outputView.outputCrewStatus(crewStatus);
             }
 
             if (function.equals("Q")) { // 종료

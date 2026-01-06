@@ -84,4 +84,16 @@ public class Crew {
     public CrewStatus getCrewStatus() {
         return crewStatus;
     }
+
+    public boolean isNotNormal() {
+        return crewStatus != CrewStatus.NORMAL;
+    }
+
+    public int getLateAbsenceCount() {
+        return absenceCount + lateCount;
+    }
+
+    public int getCrewStatusCode() {
+        return crewStatus.getCode();
+    }
 }

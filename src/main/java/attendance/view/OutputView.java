@@ -2,12 +2,14 @@ package attendance.view;
 
 import attendance.domain.dto.AttendanceModifyingResultDto;
 import attendance.domain.dto.AttendanceResultDto;
+import attendance.domain.dto.CrewStatusResultDto;
 import attendance.domain.dto.ThisMonthAttendanceResultDto;
 import attendance.domain.model.CustomDayOfWeek;
 import camp.nextstep.edu.missionutils.DateTimes;
 
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class OutputView {
 
@@ -37,5 +39,12 @@ public class OutputView {
     public void outputThisMonthAttendance(ThisMonthAttendanceResultDto resultDto) {
         System.out.println("이번달 " + resultDto.crewNickname() + "의 출석 기록입니다.");
         System.out.println(resultDto.toString());
+    }
+
+    public void outputCrewStatus(List<CrewStatusResultDto> crewStatusResultDtos) {
+        System.out.println("제적 위험자 조회 결과");
+        for (CrewStatusResultDto resultDto : crewStatusResultDtos) {
+            System.out.println(resultDto.toString());
+        }
     }
 }

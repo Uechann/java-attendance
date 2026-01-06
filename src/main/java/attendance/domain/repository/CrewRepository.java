@@ -22,4 +22,8 @@ public class CrewRepository {
                 .filter(crew -> crew.getNickname().equals(name))
                 .findFirst();
     }
+
+    public List<Crew> findAll() {
+        return List.copyOf(crews);
+    }
 }
