@@ -2,11 +2,9 @@ package attendance.domain.service;
 
 import attendance.domain.dto.AttendanceModifyingResultDto;
 import attendance.domain.dto.AttendanceResultDto;
+import attendance.domain.dto.CrewStatusResultDto;
 import attendance.domain.dto.ThisMonthAttendanceResultDto;
-import attendance.domain.model.Attendance;
-import attendance.domain.model.AttendanceStatus;
-import attendance.domain.model.Crew;
-import attendance.domain.model.CustomDayOfWeek;
+import attendance.domain.model.*;
 import attendance.domain.repository.AttendanceRepository;
 import attendance.domain.repository.CrewRepository;
 import camp.nextstep.edu.missionutils.DateTimes;
@@ -16,7 +14,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static attendance.global.exception.ErrorMessage.*;
 
@@ -28,11 +29,6 @@ public class AttendanceService {
     public AttendanceService(CrewRepository crewRepository, AttendanceRepository attendanceRepository) {
         this.crewRepository = crewRepository;
         this.attendanceRepository = attendanceRepository;
-    }
-
-    public void validateIsExist(String crewNickName) {
-        crewRepository.findByNickname(crewNickName)
-                .orElseThrow(() -> new IllegalArgumentException(CREW_NOT_FOUND.getMessage()));
     }
 
     // 출석 체크
@@ -60,15 +56,6 @@ public class AttendanceService {
         Attendance attendance = Attendance.of(crew, attendanceAt);
         attendanceRepository.save(attendance);
         return AttendanceResultDto.of(attendance);
-    }
-
-    public void validateNowDate() {
-        LocalDateTime now = DateTimes.now();
-        String dayOfWeek = CustomDayOfWeek.getKoreaName(now.getDayOfWeek());
-        if (dayOfWeek.equals("토") || dayOfWeek.equals("일")) {
-            throw new IllegalArgumentException(ERROR_MESSAGE.getMessage() +
-                    String.format(" %02d월 %02d일 %s요일은 등교일이 아닙니다.", now.getMonthValue(), now.getDayOfMonth(), dayOfWeek));
-        }
     }
 
     // 출석 수정
@@ -120,12 +107,36 @@ public class AttendanceService {
     }
 
     // 제적 위험자 확인
-
-
+    public List<CrewStatusResultDto> getCrewStatus() {
+        List<Crew> allCrews = crewRepository.findAll();
+        return allCrews.stream()
+                .filter(Crew::isNotNormal)
+                .sorted(Comparator.comparing(Crew::getCrewStatusCode, Comparator.reverseOrder())
+                        .thenComparing(Crew::getLateAbsenceCount, Comparator.reverseOrder())
+                        .thenComparing(Crew::getNickname))
+                .map(CrewStatusResultDto::of)
+                .toList();
+        // 제적 위험자는 제적 대상자, 면담 대상자, 경고 대상자순으로 출력하며,
+        // 대상 항목별 정렬 순서는 지각을 결석으로 간주하여 내림차순한다. 출석 상태가 같으면 닉네임으로 오름차순 정렬한다.
+    }
 
     public void validateIsFutureTime(LocalDateTime attendanceAt, LocalDateTime now) {
         if (attendanceAt.toLocalDate().isAfter(now.toLocalDate())) {
             throw new IllegalArgumentException(INVALID_FUTURE_TIME.getMessage());
         }
+    }
+
+    public void validateNowDate() {
+        LocalDateTime now = DateTimes.now();
+        String dayOfWeek = CustomDayOfWeek.getKoreaName(now.getDayOfWeek());
+        if (dayOfWeek.equals("토") || dayOfWeek.equals("일")) {
+            throw new IllegalArgumentException(ERROR_MESSAGE.getMessage() +
+                    String.format(" %02d월 %02d일 %s요일은 등교일이 아닙니다.", now.getMonthValue(), now.getDayOfMonth(), dayOfWeek));
+        }
+    }
+
+    public void validateIsExist(String crewNickName) {
+        crewRepository.findByNickname(crewNickName)
+                .orElseThrow(() -> new IllegalArgumentException(CREW_NOT_FOUND.getMessage()));
     }
 }
